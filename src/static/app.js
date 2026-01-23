@@ -10,8 +10,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/activities");
       const activities = await response.json();
 
-      // Clear loading message
+      // Clear previous activities
       activitiesList.innerHTML = "";
+      // Clear dropdown options (except first)
+      activitySelect.innerHTML = '<option value="">Select an activity</option>';
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -25,6 +27,18 @@ document.addEventListener("DOMContentLoaded", () => {
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <div class="participants">
+            <h5>Participants</h5>
+            <ul>
+              ${details.participants.length > 0 
+                ? details.participants.map(email => {
+                    const initials = email.substring(0, 2).toUpperCase();
+                    return `<li><span class="participant-avatar">${initials}</span> ${email}</li>`;
+                  }).join("")
+                : '<li class="empty">No participants yet</li>'
+              }
+            </ul>
+          </div>
         `;
 
         activitiesList.appendChild(activityCard);
@@ -81,6 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Initialize app
+  // Initialize app and set auto-refresh
   fetchActivities();
+  // Refresh activities every 5 seconds to show real-time updates
+  setInterval(fetchActivities, 5000);
 });
